@@ -99,6 +99,66 @@ class PersonAssetsIntentHandler(AbstractRequestHandler):
         )
 
 
+class UsersMultipleAssetsIntentHandler(AbstractRequestHandler):
+
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("UsersMultipleAssetsIntent")(handler_input)
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        assets = db_utils.get_users_multiple_assets()
+        speak_output = "Los siguiente usuarios tienen más de un activo asignado {0}".format(assets)
+
+        return (
+            handler_input.response_builder
+            .speak(speak_output)
+            .response
+        )
+
+
+class AssetInfoIntentHandler(AbstractRequestHandler):
+
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("AssetInfoIntent")(handler_input)
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        slots = handler_input.request_envelope.request.intent.slots
+        assetBrand = slots["assetBrand"].value
+        assetNumber = slots["assetNumber"].value
+        state = db_utils.get_asset_info(assetBrand + assetNumber)
+        speak_output = "El estado del activo {0} es {1}".format(assetBrand + assetNumber, state)
+
+        return (
+            handler_input.response_builder
+            .speak(speak_output)
+            .response
+        )
+
+
+class AssetInfoCompleteIntentHandler(AbstractRequestHandler):
+
+    def can_handle(self, handler_input):
+        # type: (HandlerInput) -> bool
+        return ask_utils.is_intent_name("AssetInfoCompleteIntent")(handler_input)
+
+    def handle(self, handler_input):
+        # type: (HandlerInput) -> Response
+        slots = handler_input.request_envelope.request.intent.slots
+        assetBrand = slots["assetBrand"].value
+        assetNumber = slots["assetNumber"].value
+        state = db_utils.get_asset_info_complete(assetBrand + assetNumber)
+        speak_output = "La informacion del activo {0} es {1}".format(assetBrand + assetNumber, state)
+
+        return (
+            handler_input.response_builder
+            .speak(speak_output)
+            .response
+        )
+
+
 class HelpIntentHandler(AbstractRequestHandler):
     """Handler for Help Intent."""
 
@@ -168,7 +228,6 @@ class IntentReflectorHandler(AbstractRequestHandler):
         return (
             handler_input.response_builder
             .speak(speak_output)
-            # .ask("add a reprompt if you want to keep the session open for the user to respond")
             .response
         )
 
@@ -202,6 +261,10 @@ sb.add_request_handler(LaunchRequestHandler())
 sb.add_request_handler(InactiveAssetsIntentHandler())
 sb.add_request_handler(AssetStateIntentHandler())
 sb.add_request_handler(PersonAssetsIntentHandler())
+sb.add_request_handler(UsersMultipleAssetsIntentHandler())
+sb.add_request_handler(AssetInfoIntentHandler())
+sb.add_request_handler(AssetInfoCompleteIntentHandler())
+
 sb.add_request_handler(HelpIntentHandler())
 sb.add_request_handler(CancelOrStopIntentHandler())
 sb.add_request_handler(SessionEndedRequestHandler())
