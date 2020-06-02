@@ -108,7 +108,7 @@ class UsersMultipleAssetsIntentHandler(AbstractRequestHandler):
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
         assets = db_utils.get_users_multiple_assets()
-        speak_output = "Los siguiente usuarios tienen más de un activo asignado {0}".format(assets)
+        speak_output = "Los siguientes usuarios tienen más de un activo asignado: {0}".format(assets)
 
         return (
             handler_input.response_builder
@@ -129,7 +129,7 @@ class AssetInfoIntentHandler(AbstractRequestHandler):
         assetBrand = slots["assetBrand"].value
         assetNumber = slots["assetNumber"].value
         state = db_utils.get_asset_info(assetBrand + assetNumber)
-        speak_output = "El estado del activo {0} es {1}".format(assetBrand + assetNumber, state)
+        speak_output = "Información del activo {0} es {1}".format(assetBrand + assetNumber, state)
 
         return (
             handler_input.response_builder
@@ -168,7 +168,7 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "Que desea consultar?"
+        speak_output = "estado de un equipo específico. equipos inactivos por x días. equipos asignados a una persona. personas con múltiples equipos asignados. información sobre equipo"
 
         return (
             handler_input.response_builder
