@@ -18,34 +18,52 @@ cursor = conn.cursor()
 
 def get_asset_state(asset_name):
     cursor.execute("""select estado_equipo from cmdb_cpu where name = '{0}'""".format(asset_name.upper()))
-    return cursor.fetchone()[0]
+    try:
+        return cursor.fetchone()[0]
+    except:
+        return None
 
 
 def get_person_assets(name, last_name):
-    cursor.execute("""select cpu.name, cu.customer_id from customer_user cu
+    cursor.execute("""select cpu.name, cu.email from customer_user cu
                       join cmdb_cpu cpu 
                       on cpu.owner = cu.customer_id
                       where cu.first_name = '{0}' and cu.last_name  = '{1}'""".format(name.upper(), last_name.upper()))
-    return ", ".join(["{0} | {1}".format(row[0], row[1]) for row in cursor.fetchall()])
+    try:
+        return list(cursor.fetchall())
+    except:
+        return None
 
 
 def get_inactive_n_days(num_days):
     cursor.execute("""select cpu.name from cmdb_cpu cpu
                       where cpu.estado_equipo = 'Inoperativo' and cpu.fecha_mod  < now() - interval {0} day""".format(num_days))
-    return ", ".join([row[0] for row in cursor.fetchall()])
+    try:
+        return len([row[0] for row in cursor.fetchall()])
+    except:
+        return None
 
 
 def get_users_multiple_assets():
-    cursor.execute(""" select Persona_Asignada from mytable group by Persona_Asignada having count(Persona_Asignada) > 1 """)
-    return ", ".join([row[0] for row in cursor.fetchall()])
+    cursor.execute(""" select cu.first_name, cu.last_name from cmdb_cpu cpu
+                       join customer_user cu
+                       on cu.customer_id = cpu.owner
+                       group by cu.customer_id having count(cu.customer_id) > 1 """)
+    try:
+        return ", ".join(["{0} {1}".format(row[0], row[1]) for row in cursor.fetchall()])
+    except:
+        return None
 
 
-def get_asset_info(asset_name):
-    cursor.execute("""select cu.customer_id, cu.first_name, cu.last_name, cpu.estado_equipo from cmdb_cpu cpu
+def get_asset_assignee(asset_name):
+    cursor.execute("""select cu.first_name, cu.last_name from cmdb_cpu cpu
                       join customer_user cu
                       on cu.customer_id = cpu.owner
                       where cpu.name  = '{0}'""".format(asset_name.upper()))
-    return ", ".join(["{0}".format(" | ".join(row)) for row in cursor.fetchall()])
+    try:
+        return "".join(["{0} {1}".format(row[0], row[1]) for row in cursor.fetchall()])
+    except:
+        return None
 
 
 def get_asset_info_complete(asset_name):
