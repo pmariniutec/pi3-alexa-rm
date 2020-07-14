@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 other_request_output = "\n ¿Alguna otra consulta?"
+help_text = "estado de un equipo específico. equipos inactivos por x días. equipos asignados a una persona. personas con múltiples equipos asignados. información sobre equipo"
 
 
 class LaunchRequestHandler(AbstractRequestHandler):
@@ -52,10 +53,12 @@ class InactiveAssetsIntentHandler(AbstractRequestHandler):
         inactive_items = db_utils.get_inactive_n_days(num_days)
         days_txt = "día" if num_days == 1 else "días"
         if inactive_items is not None:
-            speak_output = "Hay {0} equipos inactivos por {1} {2}.".format(inactive_items, num_days, days_txt)
+            speak_output = "Hay {0} equipos inactivos por {1} {2}.".format(
+                inactive_items, num_days, days_txt)
             speak_output += other_request_output
         else:
-            speak_output = "No existen equipos inactivos por {0} {1}.".format(num_days, days_txt)
+            speak_output = "No existen equipos inactivos por {0} {1}.".format(
+                num_days, days_txt)
 
         return (
             handler_input.response_builder
@@ -77,7 +80,8 @@ class AssetStateIntentHandler(AbstractRequestHandler):
         assetNumber = slots["assetNumber"].value
         state = db_utils.get_asset_state(assetBrand + assetNumber)
         if state is not None:
-            speak_output = "El equipo {0} se encuentra {1}.".format(assetBrand + assetNumber, state)
+            speak_output = "El equipo {0} se encuentra {1}.".format(
+                assetBrand + assetNumber, state)
             speak_output += other_request_output
         else:
             speak_output = "Al parecer ese equipo no existe, por favor vuelva a pronunciar la marca y número del equipo."
@@ -103,10 +107,12 @@ class PersonAssetsIntentHandler(AbstractRequestHandler):
         fullName = "{0} {1}".format(personName, personLastName)
         data = db_utils.get_person_assets(personName, personLastName)
         if data is not None and len(data) > 0:
-            assets = ", ".join(d[0] for d in data) 
-            msg = ("el siguiente equipo:" if len(data) == 1 else "los siguientes equipos:") + " {0} con el siguiente usuario {1}".format(assets, data[0][1])
+            assets = ", ".join(d[0] for d in data)
+            msg = ("el siguiente equipo:" if len(data) == 1 else "los siguientes equipos:") + \
+                " {0} con el siguiente usuario {1}".format(assets, data[0][1])
 
-            speak_output = "La persona {0} tiene asignado {1}.".format(fullName, msg)
+            speak_output = "La persona {0} tiene asignado {1}.".format(
+                fullName, msg)
             speak_output += other_request_output
         else:
             speak_output = "Al parecer esa persona no existe o no tiene ningún equipo asignado."
@@ -126,9 +132,10 @@ class UsersMultipleAssetsIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        users = db_utils.get_users_multiple_assets()
-        if users is not None:
-            speak_output = "Claro, las personas con múltiples equipos son: {0}.".format(users)
+        user_count = db_utils.get_users_multiple_assets()
+        if user_count is not None:
+            speak_output = "Claro, las personas con múltiples equipos son: {0}.".format(
+                user_count)
             speak_output += other_request_output
         else:
             speak_output = "Ninguna persona en este momento"
@@ -153,7 +160,8 @@ class AssetInfoIntentHandler(AbstractRequestHandler):
         assetNumber = slots["assetNumber"].value
         assignee = db_utils.get_asset_assignee(assetBrand + assetNumber)
         if assignee is not None:
-            speak_output = "El equipo {0} se encuentra asignado a {1}.".format(assetBrand + assetNumber, assignee)
+            speak_output = "El equipo {0} se encuentra asignado a {1}.".format(
+                assetBrand + assetNumber, assignee)
             speak_output += other_request_output
         else:
             speak_output = "Al parecer ese equipo no existe, por favor vuelve a pronunciar la marca y número del equipo."
@@ -180,7 +188,8 @@ class AssetInfoCompleteIntentHandler(AbstractRequestHandler):
         assetBrand = slots["assetBrand"].value
         assetNumber = slots["assetNumber"].value
         state = db_utils.get_asset_info_complete(assetBrand + assetNumber)
-        speak_output = "La informacion del activo {0} es {1}".format(assetBrand + assetNumber, state)
+        speak_output = "La informacion del activo {0} es {1}".format(
+            assetBrand + assetNumber, state)
 
         return (
             handler_input.response_builder
@@ -198,7 +207,7 @@ class HelpIntentHandler(AbstractRequestHandler):
 
     def handle(self, handler_input):
         # type: (HandlerInput) -> Response
-        speak_output = "estado de un equipo específico. equipos inactivos por x días. equipos asignados a una persona. personas con múltiples equipos asignados. información sobre equipo"
+        speak_output = help_text
 
         return (
             handler_input.response_builder

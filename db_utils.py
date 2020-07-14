@@ -45,12 +45,15 @@ def get_inactive_n_days(num_days):
 
 
 def get_users_multiple_assets():
-    cursor.execute(""" select cu.first_name, cu.last_name from cmdb_cpu cpu
+    cursor.execute(""" select count(*) from 
+                       (select count(*), cu.first_name, cu.last_name
+                       from cmdb_cpu cpu
                        join customer_user cu
                        on cu.customer_id = cpu.owner
-                       group by cu.customer_id having count(cu.customer_id) > 1 """)
+                       group by cu.customer_id having count(cu.customer_id) > 1) as c;
+            """)
     try:
-        return ", ".join(["{0} {1}".format(row[0], row[1]) for row in cursor.fetchall()])
+        return cursor.fetchone()[0]
     except:
         return None
 
